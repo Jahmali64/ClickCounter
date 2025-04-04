@@ -1,6 +1,6 @@
 @ClickCounter.Api_HostAddress = http://localhost:5065
 
-GET {{ClickCounter.Api_HostAddress}}/counter/
+GET {{ClickCounter.Api_HostAddress}}/
 Accept: application/json
 
 ###

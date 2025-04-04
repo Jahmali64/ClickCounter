@@ -32,7 +32,7 @@ try {
         });
     builder.Services.AddCors(options => {
         options.AddPolicy(name: "Development", configurePolicy: policy => policy.AllowAnyOrigin());
-        options.AddPolicy(name: "Production", configurePolicy: policy => policy.WithOrigins("https://clickcounter.azurewebsites.net"));
+        options.AddPolicy(name: "Production", configurePolicy: policy => policy.WithOrigins(builder.Configuration["AllowedHosts"]!.Split(",")));
     });
 
     builder.Services.AddAuthentication(options => {
@@ -65,7 +65,7 @@ try {
     app.UseAuthentication();
     app.UseAuthorization();
     app.MapControllers();
-    app.MapGet("/", () => Results.Ok("ClickCounter API is running ✅"));
+    app.MapGet("/", () => Results.Ok("Click Counter API is running ✅"));
     app.Run();
 } catch (Exception ex) {
     Log.Fatal(ex, "Unhandled exception");
