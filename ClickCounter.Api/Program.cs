@@ -17,11 +17,6 @@ try {
     Log.Information("Starting Click Counter API");
     WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-    builder.Configuration.SetBasePath(Directory.GetParent(builder.Environment.ContentRootPath)!.FullName)
-        .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-        .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
-        .AddEnvironmentVariables();
-
     JwtSettings jwtSettings = new();
     builder.Configuration.GetSection(nameof(JwtSettings)).Bind(jwtSettings);
     builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(nameof(JwtSettings)));
