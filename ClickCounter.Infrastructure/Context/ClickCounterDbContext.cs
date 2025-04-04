@@ -8,6 +8,8 @@ public partial class ClickCounterDbContext : DbContext {
 
     public ClickCounterDbContext(DbContextOptions<ClickCounterDbContext> options) : base(options) { }
 
+    public virtual DbSet<Counter> Counters { get; set; }
+
     public virtual DbSet<Role> Roles { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
@@ -21,6 +23,10 @@ public partial class ClickCounterDbContext : DbContext {
         => optionsBuilder.UseSqlite("DataSource=../ClickCounter.Infrastructure/Data/app.db");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
+        modelBuilder.Entity<Counter>(entity => {
+            entity.HasIndex(e => e.CounterId, "IX_Counters_CounterId").IsUnique();
+        });
+
         modelBuilder.Entity<Role>(entity => {
             entity.HasIndex(e => e.RoleId, "IX_Roles_RoleId").IsUnique();
         });
