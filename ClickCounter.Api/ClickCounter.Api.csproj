@@ -22,4 +22,10 @@
       <ProjectReference Include="..\ClickCounter.Shared\ClickCounter.Shared.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <Content Include="..\app.db">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
 </Project>
