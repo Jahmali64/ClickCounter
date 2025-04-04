@@ -65,6 +65,7 @@ try {
     app.UseAuthentication();
     app.UseAuthorization();
     app.MapControllers();
+    app.MapGet("/", () => Results.Ok("ClickCounter API is running ✅"));
     app.Run();
 } catch (Exception ex) {
     Log.Fatal(ex, "Unhandled exception");
