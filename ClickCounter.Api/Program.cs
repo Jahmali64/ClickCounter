@@ -31,8 +31,9 @@ try {
             return httpContextAccessor.HttpContext?.RequestAborted ?? CancellationToken.None;
         });
     builder.Services.AddCors(options => {
-        options.AddPolicy(name: "Development", configurePolicy: policy => policy.AllowAnyOrigin());
-        options.AddPolicy(name: "Production", configurePolicy: policy => policy.WithOrigins(builder.Configuration["AllowedHosts"]!.Split(",")));
+        string[] allowedOrigins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>() ?? ["*"];
+        options.AddPolicy(name: "Development", configurePolicy: policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+        options.AddPolicy(name: "Production", configurePolicy: policy => policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod());
     });
 
     builder.Services.AddAuthentication(options => {
