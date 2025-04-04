@@ -30,6 +30,10 @@ try {
             IHttpContextAccessor httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
             return httpContextAccessor.HttpContext?.RequestAborted ?? CancellationToken.None;
         });
+    builder.Services.AddCors(options => {
+        options.AddPolicy(name: "Development", configurePolicy: policy => policy.AllowAnyOrigin());
+        options.AddPolicy(name: "Production", configurePolicy: policy => policy.WithOrigins("www.production.com"));
+    });
 
     builder.Services.AddAuthentication(options => {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -52,6 +56,9 @@ try {
     if (app.Environment.IsDevelopment()) {
         app.MapOpenApi();
         app.MapScalarApiReference();
+        app.UseCors("Development");
+    } else {
+        app.UseCors("Production");
     }
 
     app.UseHttpsRedirection();
