@@ -17,13 +17,15 @@ public class CounterController : Controller {
 
     [HttpGet]
     public async Task<ActionResult<List<CounterDto>>> GetCountersAsync() {
-        _logger.LogInformation("Invoking {method}", nameof(GetCountersAsync));
+        string api = HttpContext.Request.Path.Value ?? string.Empty;
+        _logger.LogInformation("Requesting '{api}'", api);
 
         try {
             List<CounterDto> counterDtos = await _counterService.GetAllAsync();
+            _logger.LogInformation("Request to '{api}' processed successfully", api);
             return Ok(counterDtos);
         } catch (Exception ex) {
-            _logger.LogError(ex, nameof(GetCountersAsync));
+            _logger.LogError(ex, "Error while processing request to {api}", api);
             return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
         }
     }
