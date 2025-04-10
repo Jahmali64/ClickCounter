@@ -1,6 +1,7 @@
 ﻿using ClickCounter.Application.Services.Counter.DTOs;
 using ClickCounter.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace ClickCounter.Application.Services.Counter;
 
@@ -14,31 +15,43 @@ public interface ICounterService {
 
 public sealed class CounterService : ICounterService {
     private readonly IDbContextFactory<ClickCounterDbContext> _dbContextFactory;
+    private readonly IMemoryCache _memoryCache;
     private readonly CancellationToken _cancellationToken;
 
-    public CounterService(IDbContextFactory<ClickCounterDbContext> dbContextFactory, CancellationToken cancellationToken) {
+    public CounterService(IDbContextFactory<ClickCounterDbContext> dbContextFactory, IMemoryCache memoryCache, CancellationToken cancellationToken) {
         _dbContextFactory = dbContextFactory;
+        _memoryCache = memoryCache;
         _cancellationToken = cancellationToken;
     }
 
     public async Task<List<CounterDto>> GetAllAsync() {
+        const string cacheKey = "counters";
+        if (_memoryCache.TryGetValue(cacheKey, out List<CounterDto>? counters)) return counters ?? [];
+        
         await using ClickCounterDbContext dbContext = await _dbContextFactory.CreateDbContextAsync(_cancellationToken);
-
-        return await dbContext.Counters.Where(counter => counter.Trash == 0).Select(counter => new CounterDto {
+        List<CounterDto> result = await dbContext.Counters.Where(counter => counter.Trash == 0).Select(counter => new CounterDto {
             CounterId = counter.CounterId,
             Name = counter.Name ?? string.Empty,
             Count = counter.Count
         }).ToListAsync(_cancellationToken);
+        
+        _memoryCache.Set(cacheKey, result, TimeSpan.FromMinutes(5));
+        return result;
     }
 
     public async Task<CounterDto?> GetByIdAsync(int counterId) {
-        await using ClickCounterDbContext dbContext = await _dbContextFactory.CreateDbContextAsync(_cancellationToken);
+        var cacheKey = $"counter{counterId}";
+        if (_memoryCache.TryGetValue(cacheKey, out CounterDto? counterDto)) return counterDto;
         
-        return await dbContext.Counters.Where(counter => counter.CounterId == counterId && counter.Trash == 0).Select(counter => new CounterDto {
+        await using ClickCounterDbContext dbContext = await _dbContextFactory.CreateDbContextAsync(_cancellationToken);
+        CounterDto? result = await dbContext.Counters.Where(counter => counter.CounterId == counterId && counter.Trash == 0).Select(counter => new CounterDto {
             CounterId = counter.CounterId,
             Name = counter.Name ?? string.Empty,
             Count = counter.Count
         }).FirstOrDefaultAsync(_cancellationToken);
+        
+        _memoryCache.Set(cacheKey, result, TimeSpan.FromMinutes(5));
+        return result;
     }
 
     public async Task<CounterDto> AddAsync(SaveCounterDto saveCounterDto) {
