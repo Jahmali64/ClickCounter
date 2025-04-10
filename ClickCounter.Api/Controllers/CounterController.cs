@@ -70,7 +70,7 @@ public class CounterController : Controller {
     }
     
     [HttpPut("{id:int}")]
-    public async Task<IActionResult> UpdateCounterAsync(int id, [FromBody] SaveCounterDto saveCounterDto) {
+    public async Task<ActionResult> UpdateCounterAsync(int id, [FromBody] SaveCounterDto saveCounterDto) {
         string api = HttpContext.Request.Path.Value ?? string.Empty;
         _logger.LogInformation("Requesting '{api}'", api);
         
@@ -94,7 +94,7 @@ public class CounterController : Controller {
     }
     
     [HttpDelete("{id:int}")]
-    public async Task<IActionResult> DeleteCounterAsync(int id) {
+    public async Task<ActionResult> DeleteCounterAsync(int id) {
         string api = HttpContext.Request.Path.Value ?? string.Empty;
         _logger.LogInformation("Requesting '{api}'", api);
         
